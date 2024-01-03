@@ -7,7 +7,7 @@ export default function App() {
     const [stop, setStop] = useState(false);
     const [drawing, setDrawing] = useState(true);
 
-    function toggleFloat() {
+    function toggleStop() {
         setStop((stop) => !stop);
     }
 
@@ -58,8 +58,8 @@ export default function App() {
             hearts.forEach((heart) => heart.remove());
         }
 
-        function spaceToggleFloat(e) {
-            if (e.code === "Space") toggleFloat();
+        function spaceToggleStop(e) {
+            if (e.code === "Space") toggleStop();
         }
 
         function leftClickToggleDrawing(e) {
@@ -72,12 +72,12 @@ export default function App() {
         }
 
         wrapper.addEventListener("mousedown", leftClickToggleDrawing);
-        document.addEventListener("keydown", spaceToggleFloat);
+        document.addEventListener("keydown", spaceToggleStop);
         wrapper.addEventListener("contextmenu", rightClickClear);
 
         return () => {
             wrapper.removeEventListener("contextmenu", rightClickClear);
-            document.removeEventListener("keydown", spaceToggleFloat);
+            document.removeEventListener("keydown", spaceToggleStop);
             wrapper.removeEventListener("mousedown", leftClickToggleDrawing);
         };
     }, [wrapperRef]);
