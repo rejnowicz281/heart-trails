@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import generateHeartSvg from "../../utils/generateHeartSvg";
 import css from "./index.module.css";
 
 export default function App() {
@@ -14,14 +15,14 @@ export default function App() {
         setDrawing((drawing) => !drawing);
     }
 
-    function stopBlock(block) {
-        block.style.top = `${block.getBoundingClientRect().top}px`;
-        block.style.opacity = window.getComputedStyle(block).opacity;
-        block.classList.remove(css["fly-up"]);
+    function stopHeart(heart) {
+        heart.style.top = `${heart.getBoundingClientRect().top}px`;
+        heart.style.opacity = window.getComputedStyle(heart).opacity;
+        heart.classList.remove(css["fly-up"]);
     }
 
-    function makeBlockFlyUp(block) {
-        block.classList.add(css["fly-up"]);
+    function makeHeartFlyUp(heart) {
+        heart.classList.add(css["fly-up"]);
     }
 
     useEffect(() => {
@@ -36,14 +37,14 @@ export default function App() {
         const wrapper = wrapperRef.current;
         if (!wrapper) return;
 
-        const blocks = wrapper.querySelectorAll(".block");
+        const hearts = wrapper.querySelectorAll(".heart");
 
         if (stop) {
             wrapper.classList.add(css["wrapper-stop"]);
-            blocks.forEach((block) => stopBlock(block));
+            hearts.forEach((heart) => stopHeart(heart));
         } else {
             wrapper.classList.remove(css["wrapper-stop"]);
-            blocks.forEach((block) => makeBlockFlyUp(block));
+            hearts.forEach((heart) => makeHeartFlyUp(heart));
         }
     }, [wrapperRef, stop]);
 
@@ -51,10 +52,10 @@ export default function App() {
         const wrapper = wrapperRef.current;
         if (!wrapper) return;
 
-        function clearBlocks() {
-            const blocks = wrapper.querySelectorAll(".block");
+        function clearHearts() {
+            const hearts = wrapper.querySelectorAll(".heart");
 
-            blocks.forEach((block) => block.remove());
+            hearts.forEach((heart) => heart.remove());
         }
 
         function spaceToggleFloat(e) {
@@ -67,7 +68,7 @@ export default function App() {
 
         function rightClickClear(e) {
             e.preventDefault();
-            clearBlocks();
+            clearHearts();
         }
 
         wrapper.addEventListener("mousedown", leftClickToggleDrawing);
@@ -86,25 +87,25 @@ export default function App() {
 
         const width = wrapperRef.current.offsetWidth;
 
-        const block = document.createElement("div");
+        const heart = generateHeartSvg();
 
-        const size = width / 50;
-        block.style.width = `${size}px`;
-        block.style.height = `${size}px`;
+        const size = width / 40;
+        heart.setAttribute("width", `${size}px`);
+        heart.setAttribute("height", `${size}px`);
+        heart.setAttribute("fill", `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`);
 
-        block.style.position = "absolute";
-        block.style.left = `${e.pageX - size / 2}px`;
-        block.style.top = `${e.pageY - size / 2}px`;
-        block.style.backgroundColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+        heart.style.position = "absolute";
+        heart.style.left = `${e.pageX - size / 2}px`;
+        heart.style.top = `${e.pageY - size / 2}px`;
 
-        block.classList.add("block");
-        if (!stop) block.classList.add(css["fly-up"]);
+        heart.classList.add("heart");
+        if (!stop) heart.classList.add(css["fly-up"]);
 
-        block.addEventListener("animationend", (e) => {
-            if (e.animationName === css["fly-up-anim"]) block.remove();
+        heart.addEventListener("animationend", (e) => {
+            if (e.animationName === css["fly-up-anim"]) heart.remove();
         });
 
-        wrapperRef.current.appendChild(block);
+        wrapperRef.current.appendChild(heart);
     }
 
     return <div className={css.wrapper} onMouseMove={handleMouseMove} ref={wrapperRef}></div>;
