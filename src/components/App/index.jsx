@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import generateHeartStyle from "../../utils/generateHeartStyle";
 import generateHeartSvg from "../../utils/generateHeartSvg";
+import getRandomRGB from "../../utils/getRandomRGB";
 import css from "./index.module.css";
 
 export default function App() {
@@ -16,13 +18,38 @@ export default function App() {
     }
 
     function stopHeart(heart) {
-        heart.style.top = `${heart.getBoundingClientRect().top}px`;
-        heart.style.opacity = window.getComputedStyle(heart).opacity;
-        heart.classList.remove(css["fly-up"]);
+        const animations = heart.getAnimations();
+
+        animations.forEach((animation) => animation.pause());
     }
 
-    function makeHeartFlyUp(heart) {
-        heart.classList.add(css["fly-up"]);
+    function resumeHeart(heart) {
+        const animations = heart.getAnimations();
+
+        if (animations.length === 0) animateHeart(heart);
+        else
+            animations.forEach((animation) => {
+                const remainingTime = animation.effect.getTiming().duration - animation.currentTime;
+                if (remainingTime <= 0) animation.finish(); // have to do this because the 'paused' state takes precedence over the 'finished' state
+
+                if (remainingTime > 0) animation.play();
+            });
+    }
+
+    function animateHeart(heart) {
+        const randomDuration = Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000;
+
+        const anim = heart.animate(
+            [{ transform: "translatey(0px)" }, { transform: "translatey(-100vh)", opacity: 0 }],
+            {
+                duration: randomDuration,
+                easing: "ease-in-out",
+                fill: "forwards",
+                iterations: 1,
+            }
+        );
+
+        anim.onfinish = () => heart.remove();
     }
 
     useEffect(() => {
@@ -37,14 +64,14 @@ export default function App() {
         const wrapper = wrapperRef.current;
         if (!wrapper) return;
 
-        const hearts = wrapper.querySelectorAll(".heart");
+        const hearts = wrapper.querySelectorAll(`.${css.heart}`);
 
         if (stop) {
             wrapper.classList.add(css["wrapper-stop"]);
             hearts.forEach((heart) => stopHeart(heart));
         } else {
             wrapper.classList.remove(css["wrapper-stop"]);
-            hearts.forEach((heart) => makeHeartFlyUp(heart));
+            hearts.forEach((heart) => resumeHeart(heart));
         }
     }, [wrapperRef, stop]);
 
@@ -53,7 +80,7 @@ export default function App() {
         if (!wrapper) return;
 
         function clearHearts() {
-            const hearts = wrapper.querySelectorAll(".heart");
+            const hearts = wrapper.querySelectorAll(`.${css.heart}`);
 
             hearts.forEach((heart) => heart.remove());
         }
@@ -85,27 +112,19 @@ export default function App() {
     function handleMouseMove(e) {
         if (!drawing) return;
 
-        const width = wrapperRef.current.offsetWidth;
+        const wrapper = wrapperRef.current;
 
-        const heart = generateHeartSvg();
+        const width = wrapper.offsetWidth;
 
         const size = width / 40;
-        heart.setAttribute("width", `${size}px`);
-        heart.setAttribute("height", `${size}px`);
-        heart.setAttribute("fill", `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`);
 
-        heart.style.position = "absolute";
-        heart.style.left = `${e.pageX - size / 2}px`;
-        heart.style.top = `${e.pageY - size / 2}px`;
+        const classList = [css.heart];
 
-        heart.classList.add("heart");
-        if (!stop) heart.classList.add(css["fly-up"]);
+        const heart = generateHeartSvg(size, getRandomRGB(), generateHeartStyle(e.pageX, e.pageY, size), classList);
 
-        heart.addEventListener("animationend", (e) => {
-            if (e.animationName === css["fly-up-anim"]) heart.remove();
-        });
+        if (!stop) animateHeart(heart);
 
-        wrapperRef.current.appendChild(heart);
+        wrapper.appendChild(heart);
     }
 
     return <div className={css.wrapper} onMouseMove={handleMouseMove} ref={wrapperRef}></div>;

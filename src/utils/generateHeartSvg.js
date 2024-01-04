@@ -6,12 +6,19 @@
 //     </g>
 // </svg>;
 
-export default function generateHeartSvg() {
+export default function generateHeartSvg(size, fill, style, classList) {
     const svgNS = "http://www.w3.org/2000/svg";
 
     // Create the SVG element
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", `${size}px`);
+    svg.setAttribute("height", `${size}px`);
+    svg.setAttribute("fill", fill);
+    svg.style.cssText = style;
+    classList.forEach((className) => {
+        svg.classList.add(className);
+    });
 
     // Create the first group element
     const g1 = document.createElementNS(svgNS, "g");
