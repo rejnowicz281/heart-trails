@@ -109,8 +109,10 @@ export default function App() {
         };
     }, [wrapperRef]);
 
-    function handleMouseMove(e) {
+    function handleWrapperHover(e) {
         if (!drawing) return;
+
+        if (e.touches) e = e.touches[0]; // for mobile
 
         const wrapper = wrapperRef.current;
 
@@ -127,5 +129,12 @@ export default function App() {
         wrapper.appendChild(heart);
     }
 
-    return <div className={css.wrapper} onMouseMove={handleMouseMove} ref={wrapperRef}></div>;
+    return (
+        <div
+            className={css.wrapper}
+            onMouseMove={handleWrapperHover}
+            onTouchMove={handleWrapperHover}
+            ref={wrapperRef}
+        ></div>
+    );
 }
