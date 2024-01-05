@@ -117,8 +117,9 @@ export default function App() {
         const wrapper = wrapperRef.current;
 
         const width = wrapper.offsetWidth;
+        const height = wrapper.offsetHeight;
 
-        const size = width / 40;
+        const size = (width + height) / 55;
 
         const classList = [css.heart];
 
